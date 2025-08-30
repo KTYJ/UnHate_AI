@@ -2,7 +2,7 @@ streamlit
 nltk
 numpy
 scikit-learn
-fastlangdetect
+fast_langdetect
 dill
 indic-nlp-library
 tensorflow
