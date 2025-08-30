@@ -32,20 +32,20 @@ from sklearn.exceptions import NotFittedError
 st.set_page_config(page_title="Multilingual Text Classifier", layout="wide", initial_sidebar_state="expanded")
 # Use Streamlit's caching to avoid re-downloading and re-initializing on every run.
 @st.cache_resource
-@st.cache_resource
 def initialize_resources():
     """Downloads NLTK data and sets up tokenizers."""
     print("--- Initializing Tokenization Resources ---")
     try:
         # 📦 Download required NLTK resources
         print("Downloading NLTK 'punkt' model...")
-        nltk.download('wordnet')
-        nltk.download('omw-1.4')
+       
         nltk.download('punkt')
         print("Downloading NLTK 'stopwords' model...")
         nltk.download('stopwords')
+        nltk.download('wordnet')
+        nltk.download('omw-1.4')
+        nltk.download('punkt_tab')
         print("NLTK downloads complete.")
-
         # Get English stopwords
         eng_stop_words = set(stopwords.words('english'))
         # Load Bengali stopwords from NLTK
