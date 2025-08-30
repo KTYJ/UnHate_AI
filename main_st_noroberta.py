@@ -44,6 +44,10 @@ def initialize_resources():
         nltk.download('stopwords')
         print("NLTK downloads complete.")
 
+        nltk.download('punkt_tab')
+        nltk.download('wordnet')
+        nltk.download('omw-1.4')
+
         # Get English stopwords
         eng_stop_words = set(stopwords.words('english'))
         # Load Bengali stopwords from NLTK
