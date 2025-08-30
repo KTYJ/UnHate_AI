@@ -40,8 +40,6 @@ def initialize_resources():
         # 📦 Download required NLTK resources
         print("Downloading NLTK 'punkt' model...")
         nltk.download('wordnet')
-        nltk.download('punkt-tab')
-        nltk.download('wordnet')
         nltk.download('omw-1.4')
         nltk.download('punkt')
         print("Downloading NLTK 'stopwords' model...")
