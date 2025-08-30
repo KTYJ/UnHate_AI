@@ -222,7 +222,7 @@ tokenizers = {
 
 langdetect_to_tokenizer = {
     'en': 'eng', 'fr': 'fre', 'hi': 'hin', 'tr': 'tur', 'bn': 'ben',
-    'ko': 'kor', 'zh': 'chi', 'zh-cn': 'chi', 'it': 'ita', 'es': 'spa',
+    'ko': 'kor', 'zh': 'chi', 'zh-cn': 'chi','yue': 'chi', 'it': 'ita', 'es': 'spa',
     'id': 'ind', 'de': 'ger', 'pt': 'por', 'ru': 'rus', 'ar': 'ara'
 }
 
