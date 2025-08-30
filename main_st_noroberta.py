@@ -36,9 +36,13 @@ def initialize_resources():
     """Downloads NLTK data and sets up tokenizers."""
     print("--- Initializing Tokenization Resources ---")
     try:
-        # 📦 Download required NLTK resources
-        nltk.download('punkt', quiet=True)
-        nltk.download('stopwords', quiet=True)
+        # 📦 Download required NLTK resources.
+        # We are removing 'quiet=True' to see the download progress in the logs.
+        print("Downloading NLTK 'punkt' model...")
+        nltk.download('punkt')
+        print("Downloading NLTK 'stopwords' model...")
+        nltk.download('stopwords')
+        print("NLTK downloads complete.")
 
         # Get English stopwords
         eng_stop_words = set(stopwords.words('english'))
@@ -73,7 +77,6 @@ def initialize_resources():
         st.error(
             "Please ensure you have installed all required libraries (nltk, indic-nlp-library, jieba, konlpy, etc.).")
         return None, None, None, None, None
-
 
 eng_stop_words, bengali_stopwords, hindi_stopwords, normalizer, mecab = initialize_resources()
 
