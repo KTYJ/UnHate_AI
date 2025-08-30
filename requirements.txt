@@ -1,0 +1,10 @@
+streamlit
+nltk
+numpy
+scikit-learn
+fastlangdetect
+dill
+indic-nlp-library
+tensorflow
+jieba
+konlpy
