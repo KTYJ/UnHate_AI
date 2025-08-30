@@ -39,6 +39,10 @@ def initialize_resources():
     try:
         # 📦 Download required NLTK resources
         print("Downloading NLTK 'punkt' model...")
+        nltk.download('wordnet')
+        nltk.download('punkt-tab')
+        nltk.download('wordnet')
+        nltk.download('omw-1.4')
         nltk.download('punkt')
         print("Downloading NLTK 'stopwords' model...")
         nltk.download('stopwords')
@@ -88,6 +92,8 @@ eng_stop_words, bengali_stopwords, hindi_stopwords, normalizer, mecab = initiali
 
 def tokenize_eng(text):
     tokens = nltk.word_tokenize(text)
+    print(f"tokens: {tokens}")
+    print (f"stop: {eng_stop_words}")
     return [word for word in tokens if word not in eng_stop_words]
 
 
