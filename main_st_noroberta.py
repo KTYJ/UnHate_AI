@@ -32,21 +32,17 @@ from sklearn.exceptions import NotFittedError
 st.set_page_config(page_title="Multilingual Text Classifier", layout="wide", initial_sidebar_state="expanded")
 # Use Streamlit's caching to avoid re-downloading and re-initializing on every run.
 @st.cache_resource
+@st.cache_resource
 def initialize_resources():
     """Downloads NLTK data and sets up tokenizers."""
     print("--- Initializing Tokenization Resources ---")
     try:
-        # 📦 Download required NLTK resources.
-        # We are removing 'quiet=True' to see the download progress in the logs.
+        # 📦 Download required NLTK resources
         print("Downloading NLTK 'punkt' model...")
         nltk.download('punkt')
         print("Downloading NLTK 'stopwords' model...")
         nltk.download('stopwords')
         print("NLTK downloads complete.")
-
-        nltk.download('punkt_tab')
-        nltk.download('wordnet')
-        nltk.download('omw-1.4')
 
         # Get English stopwords
         eng_stop_words = set(stopwords.words('english'))
@@ -63,23 +59,24 @@ def initialize_resources():
         factory = IndicNormalizerFactory()
         normalizer = factory.get_normalizer("hi")
 
-        # 🇰🇷 Set up Korean tokenizer (Mecab preferred, Okt as fallback)
         mecab_tokenizer = None
-        if Mecab:
+        if Mecab: # Only try if konlpy was imported
             try:
+                # Try to initialize Mecab or Okt
                 mecab_tokenizer = Mecab()
-                print("Using Mecab for Korean tokenization.")
-            except:
-                mecab_tokenizer = Okt()
-                print("Mecab not found. Falling back to Okt for Korean tokenization.")
+                print("Successfully initialized Mecab for Korean tokenization.")
+            except Exception as konlpy_error:
+                # If it fails, print a warning and continue without it.
+                print(f"Warning: konlpy initialization failed: {konlpy_error}")
+                print("Korean tokenization will use a basic fallback.")
+                mecab_tokenizer = None # Ensure it is None
 
         print("--- Initialization Complete ---\n")
         return eng_stop_words, bengali_stopwords, hindi_stopwords, normalizer, mecab_tokenizer
 
     except Exception as e:
-        st.error(f"An error occurred during initialization: {e}")
-        st.error(
-            "Please ensure you have installed all required libraries (nltk, indic-nlp-library, jieba, konlpy, etc.).")
+        # This outer block now catches other, more critical errors.
+        st.error(f"A critical error occurred during resource initialization: {e}")
         return None, None, None, None, None
 
 eng_stop_words, bengali_stopwords, hindi_stopwords, normalizer, mecab = initialize_resources()
