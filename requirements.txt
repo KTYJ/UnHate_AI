@@ -4,6 +4,7 @@ numpy
 scikit-learn
 fast_langdetect
 dill
+googletrans==4.0.0-rc1
 indic-nlp-library
 tensorflow
 jieba

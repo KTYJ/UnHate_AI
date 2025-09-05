@@ -13,6 +13,9 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 import jieba
 from tensorflow.keras.preprocessing.text import tokenizer_from_json
 
+# --- Translation Imports ---
+from googletrans import Translator,LANGUAGES
+
 # Konlpy can be tricky on some systems, so we handle its import gracefully
 try:
     from konlpy.tag import Okt, Mecab
@@ -38,7 +41,7 @@ def initialize_resources():
     try:
         # 📦 Download required NLTK resources
         print("Downloading NLTK 'punkt' model...")
-       
+
         nltk.download('punkt')
         print("Downloading NLTK 'stopwords' model...")
         nltk.download('stopwords')
@@ -90,8 +93,6 @@ eng_stop_words, bengali_stopwords, hindi_stopwords, normalizer, mecab = initiali
 
 def tokenize_eng(text):
     tokens = nltk.word_tokenize(text)
-    print(f"tokens: {tokens}")
-    print (f"stop: {eng_stop_words}")
     return [word for word in tokens if word not in eng_stop_words]
 
 
@@ -338,12 +339,43 @@ def extract_language_code(label: str) -> str:
     """Extracts the first three-letter language code from a label string."""
     return label.split('_')[0] if label else "Unknown"
 
+def translate_text_to_english(text: str):
+    """
+    Detects the language of the input text and translates it to English.
+    Displays the result in the Streamlit app.
+    """
+    try:
+        # --- Language Detection ---
+        # The detect function returns a dictionary like {'lang': 'de', 'score': 0.99}
+        detected_lang_code = detect(text)['lang']
+        #print(detect(text)) #debug
+
+        # --- Translation ---
+        translator = Translator()
+        translated_object = translator.translate(text, dest='en')
+
+        # --- Output ---
+        # Get the full language names and capitalize them for display
+        source_lang_name = LANGUAGES.get(detected_lang_code, detected_lang_code).capitalize()
+        source_lang_name = "Chinese" if source_lang_name.lower() == "zh" else source_lang_name
+        dest_lang_name = LANGUAGES.get('en', 'English').capitalize()
+
+
+        st.subheader("🌐 Translation Result")
+        st.write(f"**Detected Language:** {source_lang_name}")
+        st.info(f"**Original Text:**\n\n> {text}")
+        st.success(f"**Translated to {dest_lang_name}:**\n\n> {translated_object.text}")
+
+    except Exception as e:
+        st.error(f"An error occurred during translation: {e}")
+        st.error("This may be due to a temporary issue with the translation service or an unsupported language.")
+
 
 # ==============================================================================
 # STREAMLIT UI
 # ==============================================================================
 
-st.sidebar.title("🤔 Multi-Lingual Cyberbully Detection")
+st.sidebar.title("🔬 Multi-Lingual Semantic Cyberbully Detection")
 st.sidebar.markdown("""
 Reclaim your online peace. This app is your personal shield against digital toxicity, 
 intelligently detecting and flagging harmful comments before they disrupt your space. 
@@ -405,96 +437,117 @@ with st.sidebar.expander("View supported languages"):
 selected_model_keys = [key for key, value in AVAILABLE_MODELS.items() if value in selected_models_display]
 
 st.image("dataset-cover.jpg", width=500)
-st.title("🤖UnHateAI - Hate Text Detection and Classification")
+st.title("🤖UnHateAI - Multilingual Text Classification")
 
-user_sentence = st.text_area("Enter a sentence for classification:", "This is a test sentence.", height=150)
+user_sentence = st.text_area("Enter a sentence for classification or translation:", "아니 ㅅ발 새끼 무슨 말이 안 통하내 어쩌지?", height=150)
 
-if st.button("🚀 Classify Sentence"):
-    # --- Input Validations ---
-    if not user_sentence or user_sentence.strip() == "":
-        st.warning("Please enter a sentence to classify.")
-    elif not selected_model_keys:
-        st.warning("Please select at least one model from the sidebar.")
-    elif models is None:  # Check if models loaded correctly
-        st.error("Models are not loaded. Cannot perform classification. Check file paths and logs.")
-    else:
-        with st.spinner('Analyzing text...'):
-            # --- Preprocessing Steps ---
-            detected_lang_code = 'ara'  # Default
-            with st.expander("📝 View Preprocessing Steps", expanded=False):
+# Create two columns for the buttons
+col1, col2 = st.columns(2)
+
+with col1:
+    if st.button("🚀 Classify Sentence"):
+        # --- Input Validations ---
+        if not user_sentence or user_sentence.strip() == "":
+            st.warning("Please enter a sentence to classify.")
+        elif not selected_model_keys:
+            st.warning("Please select at least one model from the sidebar.")
+        elif models is None:  # Check if models loaded correctly
+            st.error("Models are not loaded. Cannot perform classification. Check file paths and logs.")
+        else:
+            with st.spinner('Analyzing text...'):
+                # --- Preprocessing Steps ---
+                detected_lang_code = 'ara'  # Default
+                with st.expander("📝 View Preprocessing Steps", expanded=False):
+                    cleaned_sentence = preprocess_text(user_sentence)
+                    st.info(f"**1. Cleaned Text:** `{cleaned_sentence}`")
+
+                    try:
+                        detected_lang_info = detect(cleaned_sentence)
+                        detected_lang = detected_lang_info['lang']
+                        detected_lang_code = langdetect_to_tokenizer.get(detected_lang, 'ara')
+                        if detected_lang_code not in SUPPORTED_LANGUAGES:
+                            st.warning(
+                                f"Detected language '{detected_lang}' is unsupported. Defaulting to basic tokenizer.")
+                            detected_lang_code = 'ara'
+                        st.info(f"**2. Language Detected:** '{detected_lang}' (using '{detected_lang_code}' tokenizer)")
+                    except Exception as e:
+                        detected_lang_code = 'ara'
+                        st.warning(f"**2. Language Detection Failed:** {e}. Defaulting to basic tokenizer.")
+
+                    tokenizer_func = tokenizers.get(detected_lang_code, tokenizers['ara'])
+                    tokens = tokenizer_func(cleaned_sentence)
+                    tokens = [tok for tok in tokens if tok and tok.strip()]
+                    st.info(f"**3. Tokenization:** `{tokens}`")
+
+                # ensuring essential variables are available for prediction
                 cleaned_sentence = preprocess_text(user_sentence)
-                st.info(f"**1. Cleaned Text:** `{cleaned_sentence}`")
-
                 try:
                     detected_lang_info = detect(cleaned_sentence)
                     detected_lang = detected_lang_info['lang']
                     detected_lang_code = langdetect_to_tokenizer.get(detected_lang, 'ara')
                     if detected_lang_code not in SUPPORTED_LANGUAGES:
-                        st.warning(
-                            f"Detected language '{detected_lang}' is unsupported. Defaulting to basic tokenizer.")
                         detected_lang_code = 'ara'
-                    st.info(f"**2. Language Detected:** '{detected_lang}' (using '{detected_lang_code}' tokenizer)")
-                except Exception as e:
+                except Exception:
                     detected_lang_code = 'ara'
-                    st.warning(f"**2. Language Detection Failed:** {e}. Defaulting to basic tokenizer.")
 
                 tokenizer_func = tokenizers.get(detected_lang_code, tokenizers['ara'])
                 tokens = tokenizer_func(cleaned_sentence)
                 tokens = [tok for tok in tokens if tok and tok.strip()]
-                st.info(f"**3. Tokenization:** `{tokens}`")
+                tokenized_for_models = " ".join(tokens) # Join tokens for vectorizers
 
-            # ensuring essential variables are available for prediction
-            cleaned_sentence = preprocess_text(user_sentence)
-            tokenizer_func = tokenizers.get(detected_lang_code, tokenizers['ara'])
-            tokens = tokenizer_func(cleaned_sentence)
-            tokens = [tok for tok in tokens if tok and tok.strip()]
-            tokenized_for_models = tokens
+                # --- Predictions and Display ---
+                st.subheader("📊 Model Predictions")
 
-            # --- Predictions and Display ---
-            st.subheader("📊 Model Predictions")
+                predictions = {}
 
-            predictions = {}
+                # --- Run Predictions for Selected Models ---
+                if "svm" in selected_model_keys:
+                    pred, conf = predict_svm_nb_cnn(models['svm'], tokenized_for_models, tfidf_vectorizer, label_encoder)
+                    predictions['svm'] = (pred, conf)
 
-            # --- Run Predictions for Selected Models ---
-            if "svm" in selected_model_keys:
-                pred, conf = predict_svm_nb_cnn(models['svm'], tokenized_for_models, tfidf_vectorizer, label_encoder)
-                predictions['svm'] = (pred, conf)
+                if "nb" in selected_model_keys:
+                    pred, conf = predict_svm_nb_cnn(models['nb'], tokenized_for_models, tfidf_vectorizer, label_encoder)
+                    predictions['nb'] = (pred, conf)
 
-            if "nb" in selected_model_keys:
-                pred, conf = predict_svm_nb_cnn(models['nb'], tokenized_for_models, tfidf_vectorizer, label_encoder)
-                predictions['nb'] = (pred, conf)
+                if "cnn" in selected_model_keys:
+                    pred, conf = predict_svm_nb_cnn(models['cnn'], tokenized_for_models, tfidf_vectorizer, label_encoder,
+                                                    cnn_tokenizer, MAXLEN, is_cnn=True)
+                    predictions['cnn'] = (pred, conf)
 
-            if "cnn" in selected_model_keys:
-                pred, conf = predict_svm_nb_cnn(models['cnn'], tokenized_for_models, tfidf_vectorizer, label_encoder,
-                                                cnn_tokenizer, MAXLEN, is_cnn=True)
-                predictions['cnn'] = (pred, conf)
+                # --- Display Results ---
+                if predictions:
+                    # Inject custom CSS
+                    st.markdown("""
+                                <style>
+                                div[data-testid="stMetricLabel"] > div { font-size: 1.1rem; }
+                                div[data-testid="stMetricValue"] > div { font-size: 1.3rem; white-space: normal; overflow-wrap: break-word; }
+                                </style>
+                                """, unsafe_allow_html=True)
 
-            # --- Display Results ---
-            if predictions:
-                # Inject custom CSS
-                st.markdown("""
-                            <style>
-                            div[data-testid="stMetricLabel"] > div { font-size: 1.1rem; }
-                            div[data-testid="stMetricValue"] > div { font-size: 1.3rem; white-space: normal; overflow-wrap: break-word; }
-                            </style>
-                            """, unsafe_allow_html=True)
+                    cols = st.columns(len(predictions))
+                    for i, model_key in enumerate(sorted(predictions.keys())):
+                        with cols[i]:
+                            model_name = AVAILABLE_MODELS[model_key]
+                            label, confidence = predictions[model_key]
+                            st.metric(model_name, format_prediction(label, confidence))
 
-                cols = st.columns(len(predictions))
-                for i, model_key in enumerate(sorted(predictions.keys())):
-                    with cols[i]:
+                    # --- Display Language Consistency Check ---
+                    st.subheader("🤔Language Consistency Check")
+                    consistency_warnings_found = False
+                    for model_key, (label, _) in predictions.items():
                         model_name = AVAILABLE_MODELS[model_key]
-                        label, confidence = predictions[model_key]
-                        st.metric(model_name, format_prediction(label, confidence))
+                        predicted_lang = extract_language_code(label)
+                        if predicted_lang != detected_lang_code:
+                            warn_if_mismatch(model_name, predicted_lang, detected_lang_code)
+                            consistency_warnings_found = True
 
-                # --- Display Language Consistency Check ---
-                st.subheader("Language Consistency Check🤔")
-                consistency_warnings_found = False
-                for model_key, (label, _) in predictions.items():
-                    model_name = AVAILABLE_MODELS[model_key]
-                    predicted_lang = extract_language_code(label)
-                    if predicted_lang != detected_lang_code:
-                        warn_if_mismatch(model_name, predicted_lang, detected_lang_code)
-                        consistency_warnings_found = True
+                    if not consistency_warnings_found:
+                        st.success("✅ All model predictions are consistent with the detected language.")
 
-                if not consistency_warnings_found:
-                    st.success("✅ All model predictions are consistent with the detected language.")
+with col2:
+    if st.button("🌐 Translate to English"):
+        if not user_sentence or user_sentence.strip() == "":
+            st.warning("Please enter a sentence to translate.")
+        else:
+            with st.spinner('Translating text...'):
+                translate_text_to_english(user_sentence)
