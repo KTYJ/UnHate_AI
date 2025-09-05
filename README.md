@@ -5,13 +5,13 @@ Take control of your online world. Our friendly intelligent app helps you build 
 
 The repository is organized as follows:
 - **Primary Files**
-    - **`main_st.py`**: Main Streamlit file of the application 
+    - **`main_st_noroberta.py`**: Main Streamlit file of the application 
     - **`BMCS2074_UnhateAI.ipynb`**: A Jupyter Notebook containing the primary code for data preprocessing, model training, and evaluation.
     - **`requirements.txt`**: A list of all the Python libraries and dependencies required to run the project.
 
 - **Prediction Model Files**
-    - **`xlm-roberta-large-model/`**: Directory containing the fine-tuned XLM-RoBERTa model.
-    - **`xlm-roberta-results/`**: Directory to store results and outputs from the XLM-RoBERTa model.
+    - **`xlm-roberta-large-model/`**: (not available) Directory containing the fine-tuned XLM-RoBERTa model. (not available)
+    - **`xlm-roberta-results/`**: (not available) Directory to store results and outputs from the XLM-RoBERTa model.
     - **`balanced_dataset.csv`**: The primary dataset used for training and evaluation, which has been balanced to handle class imbalances.
     - **`cnn_text_classifier.h5`**: The trained Convolutional Neural Network model saved in HDF5 format.
     - **`cnn_tokenizer.json`**: The tokenizer for the CNN model, saved in JSON format.
@@ -19,15 +19,10 @@ The repository is organized as follows:
     - **`nb_finetuned_model.joblib`**: The fine-tuned Naive Bayes model saved using joblib.
     - **`svm_finetuned_model.joblib`**: The fine-tuned Support Vector Machine model saved using joblib.
     - **`tfidf.dill`**: The TF-IDF vectorizer saved using the dill library
-- **Output Files**:
-    - `cnn_output.png`, `gb_output.png`, `nb_output.png`, `svm_output.png`, `xlm_output.png`: Image files showing the output or performance of the different models. (confusion matrix)
-    - `model_comparison.png`: An image comparing the performance of the different models.
-    - `xlm-roberta_finetuning.jpg`: An image related to the fine-tuning process of the XLM-RoBERTa model.
+
 - **Other**:
     - `dataset-cover.jpg`: A cover image for the dataset.
     - **`.idea/`**: Project configuration files for JetBrains IDEs.
-    - **`.ipynb_checkpoints/`**: Automatic checkpoint files created by Jupyter Notebook.
-    - **`.venv/`**: Python virtual environment to manage project dependencies.
 
 ## 🤖 Models Used
 
@@ -36,7 +31,7 @@ This project explores several different models for text classification:
 *   **Convolutional Neural Network (CNN)**: A deep learning model that can be effective for text classification tasks.
 *   **Support Vector Machine (SVM)**: A robust machine learning algorithm that is well-suited for high-dimensional data like text.
 *   **Naive Bayes**: A probabilistic classifier that is often used as a baseline for text classification.
-*   **XLM-RoBERTa**: A powerful multilingual transformer model that has been fine-tuned for this specific task. (not available in GitHub Version due to large size)
+*   **XLM-RoBERTa**: (not available) A powerful multilingual transformer model that has been fine-tuned for this specific task. (not available in GitHub Version due to large size)
 
 ## 🤔 Getting Started
 
