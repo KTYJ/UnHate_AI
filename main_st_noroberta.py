@@ -348,6 +348,7 @@ def translate_text_to_english(text: str):
     # --- Language Detection ---
     # The detect function returns a dictionary like {'lang': 'de', 'score': 0.99}
     detected_result = detect(text)
+    print(detected_result)
     # Handle if detect returns a list of dicts or a dict
     if isinstance(detected_result, list) and len(detected_result) > 0:
         detected_lang_code = detected_result[0].get('lang', 'unknown')
