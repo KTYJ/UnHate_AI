@@ -344,31 +344,31 @@ def translate_text_to_english(text: str):
     Detects the language of the input text and translates it to English.
     Displays the result in the Streamlit app.
     """
-    try:
-        # --- Language Detection ---
-        # The detect function returns a dictionary like {'lang': 'de', 'score': 0.99}
-        detected_lang_code = detect(text)['lang']
-        #print(detect(text)) #debug
+# try:
+    # --- Language Detection ---
+    # The detect function returns a dictionary like {'lang': 'de', 'score': 0.99}
+    detected_lang_code = detect(text)['lang']
+    #print(detect(text)) #debug
 
-        # --- Translation ---
-        translator = Translator()
-        translated_object = translator.translate(text, dest='en')
+    # --- Translation ---
+    translator = Translator()
+    translated_object = translator.translate(text, dest='en')
 
-        # --- Output ---
-        # Get the full language names and capitalize them for display
-        source_lang_name = LANGUAGES.get(detected_lang_code, detected_lang_code).capitalize()
-        source_lang_name = "Chinese" if source_lang_name.lower() == "zh" else source_lang_name
-        dest_lang_name = LANGUAGES.get('en', 'English').capitalize()
+    # --- Output ---
+    # Get the full language names and capitalize them for display
+    source_lang_name = LANGUAGES.get(detected_lang_code, detected_lang_code).capitalize()
+    source_lang_name = "Chinese" if source_lang_name.lower() == "zh" else source_lang_name
+    dest_lang_name = LANGUAGES.get('en', 'English').capitalize()
 
 
-        st.subheader("🌐 Translation Result")
-        st.write(f"**Detected Language:** {source_lang_name}")
-        st.info(f"**Original Text:**\n\n> {text}")
-        st.success(f"**Translated to {dest_lang_name}:**\n\n> {translated_object.text}")
+    st.subheader("🌐 Translation Result")
+    st.write(f"**Detected Language:** {source_lang_name}")
+    st.info(f"**Original Text:**\n\n> {text}")
+    st.success(f"**Translated to {dest_lang_name}:**\n\n> {translated_object.text}")
 
-    except Exception as e:
-        st.error(f"An error occurred during translation: {e}")
-        st.error("This may be due to a temporary issue with the translation service or an unsupported language.")
+    # except Exception as e:
+    #     st.error(f"An error occurred during translation: {e}")
+    #     st.error("This may be due to a temporary issue with the translation service or an unsupported language.")
 
 
 # ==============================================================================
